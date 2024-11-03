@@ -6,17 +6,16 @@
 /*   By: vasili <vasili@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/02 18:49:02 by vasili            #+#    #+#             */
-/*   Updated: 2024/11/03 12:51:19 by vasili           ###   ########.fr       */
+/*   Updated: 2024/11/03 22:40:53 by vasili           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "dictionary.h"
-#include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-int	count_digits(int number)
+int	count_digits(long number)
 {
 	int	digit;
 
@@ -46,17 +45,28 @@ int	ten_to_power(int power)
 	return (ten);
 }
 
-void	chunk_word(int chunk, struct Dictionary *dict, int len_chunk)
+int str_len(char *s)
+{
+	int len;
+	
+	len = 0;
+	while (s[len])
+		len++;
+	return (len);
+}
+
+void	chunk_word(long chunk, struct Dictionary *dict, int len_chunk)
 {	
-	int	result;
+	long	result;
+	char	*word;
 
 	if (chunk == 0)
 		return ;
 	if (len_chunk == 3)
 	{
-		printf("%s ", get_word_number(chunk / 100, dict));
+		write(1, get_word_number(chunk / 100, dict), str_len(get_word_number(chunk / 100, dict)));
 		result = (chunk / 100) * 100;
-		printf("%s ", get_word_number(100, dict));
+		write(1, word, str_len(get_word_number(100, dict)));
 		chunk -= result;
 		len_chunk--;
 	}
@@ -64,7 +74,7 @@ void	chunk_word(int chunk, struct Dictionary *dict, int len_chunk)
 	{
 		if (get_word_number(chunk, dict) != NULL && chunk != 0)
 		{
-			printf("%s ", get_word_number(chunk, dict));
+			write(1, get_word_number(chunk, dict), str_len(get_word_number(chunk, dict)));
 			return ;
 		}
 		result = (chunk / 10) * 10;
@@ -77,14 +87,12 @@ void	chunk_word(int chunk, struct Dictionary *dict, int len_chunk)
 		printf("%s ", get_word_number(chunk, dict));
 }
 
-void	make_chunks(int number, struct Dictionary *dict)
+void	split_number_chunks(long number, struct Dictionary *dict)
 {
 	int	len;
-	int	i;
-	int	chunk;
-
-	i = 0;
-	chunk = 1;
+	int chunk;
+    
+    chunk = 1;
 	len = count_digits(number);
 	if (number == 0)
 	{
@@ -98,7 +106,7 @@ void	make_chunks(int number, struct Dictionary *dict)
 		else
 			len -= len % 3;
 		chunk = number / ten_to_power(len);
-		chunk_word(chunk, dict, count_digits(chunk));
+	    chunk_word(chunk, dict, count_digits(chunk));
 		if (len > 0 && number != 0)
 			printf("%s ", get_word_number(ten_to_power(len), dict));
 		number -=  chunk * ten_to_power(len);

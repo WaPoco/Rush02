@@ -6,15 +6,15 @@
 /*   By: vasili <vasili@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/02 18:49:05 by vasili            #+#    #+#             */
-/*   Updated: 2024/11/03 12:47:06 by vasili           ###   ########.fr       */
+/*   Updated: 2024/11/03 22:40:53 by vasili           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "dictionary.h"
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <stdio.h>
+
 
 int	count_lines(char *s)
 {
@@ -30,25 +30,23 @@ int	count_lines(char *s)
 	return (lines + 1);
 }
 
-struct Dictionary *parseDict(char *s, int max, int lines)
+void	parseDict(char *s, struct Dictionary *dict, int lines)
 {
-	struct Dictionary *dict;
-
 	int	i;
-	int	number;
+//	int	number;
 	int	k;
 
 	i = 0;
-	dict = malloc(lines * sizeof(struct Dictionary));
 	while (i < lines)
 	{
-		number = 0;
+/*		number = 0;
 		while ('0' <= *s && *s <= '9')
 		{
 			number = 10*number + (*s - '0');
 			s++;
 		}
-		dict[i].number = number;
+*/
+		dict[i].number = atol(s);
 		while (*s < 'a' || *s > 'z')
 			s++;
 		k = 0;
@@ -62,10 +60,10 @@ struct Dictionary *parseDict(char *s, int max, int lines)
 		i++;
 		s++;
 	}
-	return dict;
+	return (dict);
 }
 
-char	*get_word_number(int number, struct Dictionary *dict)
+char	*get_word_number(long number, struct Dictionary *dict)
 {
 	int	i;
 
@@ -75,4 +73,47 @@ char	*get_word_number(int number, struct Dictionary *dict)
 	if (i == 40)
 		return (NULL);
 	return (dict[i].word);
+}
+
+char	*file_str(char *pathDict)
+{
+	int	 	fd;
+	char	*buffer;
+	int		bytesRead;
+	int		bytes_buffer;
+
+	bytes_buffer = 0;
+	fd = open(pathDict, O_RDONLY);
+	if (fd == -1)
+	{
+		write(1, "Dict Error\n", sizeof("Dict Error\n") / sizeof(char));
+		return ;
+	}
+	bytes_buffer = lseek(fd, 0, SEEK_END);
+	bytesRead = read(fd, buffer, bytes_buffer - 1);
+	if (bytes_buffer == -1)
+	{
+		write(1, "Dict Error\n", sizeof("Dict Error\n") / sizeof(char));
+		return ;	
+	}
+	buffer[bytesRead] = '\0';
+	return (buffer);
+}
+
+struct dictionary *str_Dict(char *buffer)
+{
+	int		lines;
+	int		bytes_buffer;
+	struct	Dictionary *dict;
+
+	lines = 0;
+	bytes_buffer = 0;
+	lines = count_lines(buffer);
+	dict = malloc(lines * sizeof(struct Dictionary));
+	if (dict == NULL)
+	{
+		write(1, "Dict Error\n", sizeof("Dict Error\n") / sizeof(char));
+		return ;
+	}
+	return (dict);
 }
